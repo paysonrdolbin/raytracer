@@ -67,9 +67,6 @@ impl Material for PhongMaterial {
                     let specular = self.Ks * d.color * self.Os * vdotr.powf(self.Kgls);
                     color = color + specular;
 
-                    color.x = color.x.sqrt();
-                    color.y = color.y.sqrt();
-                    color.z = color.z.sqrt();
                 }
 
             }
@@ -117,34 +114,34 @@ impl Material for WhittedStyleMaterial {
             }
         }
 
-        // if max_depth > 0 {
-        //     // Generate a random direction in the hemisphere around the normal
-        //     // This simulates light bouncing off a rough/matte surface
-        //     let scatter_direction = hit.normal + Vec3::random_in_unit_sphere().unit_vector();
-        //
-        //     // Ensure the direction is valid (not zero)
-        //     let target = if scatter_direction.near_zero() { hit.normal } else { scatter_direction };
-        //
-        //     let diffuse_ray = Ray::new(hit.point + hit.normal * 1e-5, target.unit_vector());
-        //
-        //     // Recurse to find the color of the object being "seen" by this surface
-        //     let indirect_color = ray_color(&diffuse_ray, world, lights, max_depth - 1);
-        //
-        //     // Add to total color, attenuated by the material's diffuse coefficient (Kd)
-        //     color = color + (self.Kd * indirect_color);
-        // }
-        //
-        // if max_depth > 0 {
-        //     // r = d - 2n(d.dot(n)) where d is incoming ray (negate view_dir)
-        //     let d = -view_dir.unit_vector();
-        //     let reflect_dir = d - 2.0 * hit.normal * d.dot(hit.normal);
-        //
-        //     let reflect_ray = Ray::new(hit.point + hit.normal * 1e-5, reflect_dir);
-        //     let reflected_color = ray_color(&reflect_ray, world, lights, max_depth - 1);
-        //
-        //     color = color + (self.Ks * reflected_color);
-        //
-        // }
+        if max_depth > 0 {
+            // Generate a random direction in the hemisphere around the normal
+            // This simulates light bouncing off a rough/matte surface
+            let scatter_direction = hit.normal + Vec3::random_in_unit_sphere().unit_vector();
+
+            // Ensure the direction is valid (not zero)
+            let target = if scatter_direction.near_zero() { hit.normal } else { scatter_direction };
+
+            let diffuse_ray = Ray::new(hit.point + hit.normal * 1e-5, target.unit_vector());
+
+            // Recurse to find the color of the object being "seen" by this surface
+            let indirect_color = ray_color(&diffuse_ray, world, lights, max_depth - 1);
+
+            // Add to total color, attenuated by the material's diffuse coefficient (Kd)
+            color = color + (self.Kd * indirect_color);
+        }
+
+        if max_depth > 0 {
+            // r = d - 2n(d.dot(n)) where d is incoming ray (negate view_dir)
+            let d = view_dir.unit_vector();
+            let reflect_dir = (d - 2.0 * hit.normal * d.dot(hit.normal)).unit_vector();
+
+            let reflect_ray = Ray::new(hit.point + hit.normal * 1e-5, reflect_dir);
+            let reflected_color = ray_color(&reflect_ray, world, lights, max_depth - 1);
+
+            color = color + (self.Ks * reflected_color);
+
+        }
 
         color
     }

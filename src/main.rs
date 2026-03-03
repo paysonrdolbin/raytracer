@@ -117,9 +117,9 @@ fn main() {
                 pixel_color = pixel_color + ray_color(&r, &world, &lights, max_depth);
             }
             let mut final_color = pixel_color / samples as f64;
-            final_color.x = final_color.x.sqrt();
-            final_color.y = final_color.y.sqrt();
-            final_color.z = final_color.z.sqrt();
+            // final_color.x = final_color.x.sqrt();
+            // final_color.y = final_color.y.sqrt();
+            // final_color.z = final_color.z.sqrt();
             println!("{}", final_color.write_color());
         }
     }
