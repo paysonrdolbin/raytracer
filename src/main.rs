@@ -18,11 +18,12 @@ use crate::camera::Camera;
 use lights::{Light, DirectionalLight, AmbientLight};
 use crate::hittable::HittableList;
 use crate::utils::ray_color;
+use crate::common::random_double;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let camera = Camera::new(
-        Vec3::new(0.0, 0.0, 1.0), // look_from
+        Vec3::new(0.0, 0.2, 1.0), // look_from
         Vec3::new(0.0, 0.0, 0.0), // look_at
         Vec3::new(0.0, 1.0, 0.0), // up
         90.0,
@@ -36,7 +37,7 @@ fn main() {
     // ground sphere material
     let spherePhongWhite: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
         0.8,
-        0.1,
+        0.05,
         0.3,
         Vec3::new(1.0, 1.0, 1.0), // Od
         Vec3::new(1.0, 1.0, 1.0), // Os
@@ -52,7 +53,7 @@ fn main() {
     // glossy sphere material
     let spherePhongRed: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
         0.6,
-        0.3,
+        0.15,
         0.1,
         Vec3::new(1.0, 0.0, 0.0),
         Vec3::new(1.0, 1.0, 1.0),
@@ -68,7 +69,7 @@ fn main() {
 
     let spherePhongeGreen: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
        0.7,
-       0.2,
+       0.1,
        0.1,
        Vec3::new(0.0, 1.0, 0.0),
        Vec3::new(0.5, 1.0, 0.5),
@@ -76,7 +77,7 @@ fn main() {
     ));
 
     world.add(Box::new(Sphere::new(
-        Vec3::new(-0.6, 0.0, 0.0),
+        Vec3::new(-0.5, 0.0, 0.0),
         0.3,
         spherePhongeGreen
     )));
@@ -109,8 +110,8 @@ fn main() {
         for i in 0..image_width {
             let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
             for s in 0..samples {
-                let u = i as f64 / (image_width - 1) as f64;
-                let v = j as f64 / (image_height - 1) as f64;
+                let u = (i as f64 + random_double()) / (image_width - 1) as f64;
+                let v = (j as f64 + random_double()) / (image_height - 1) as f64;
 
                 let r = camera.get_ray(u, v);
 
