@@ -16,50 +16,39 @@ impl Triangle {
     }
 }
 
+
 impl Hittable for Triangle {
     fn hit<'a>(&'a self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord<'a>> {
-        const EPSILON: f64 = 0.0000001;
         let edge1 = self.v2 - self.v1;
-        let edge2 = self.v3 - self.v1;
-        let h = ray.direction.cross(edge2);
-        let a = edge1.dot(h);
+        let edge2 = self.v3 - self.v2;
+        let edge3 = self.v1 - self.v3;
 
-        if a > -EPSILON && a < EPSILON {
-            return None; // This ray is parallel to this triangle.
-        }
+        let n = edge1.cross(edge2).unit_vector();
+        let d = ray.direction;
+        let o = ray.origin;
+        let distance = -n.dot(self.v1);
 
-        let f = 1.0 / a;
-        let s = ray.origin - self.v1;
-        let u = f * s.dot(h);
+        let denom = n.x * d.x + n.y * d.y + n.z * d.z;
 
-        if u < 0.0 || u > 1.0 {
-            return None;
-        }
+        if denom.abs() < 1e-7 { return None; }
 
-        let q = s.cross(edge1);
-        let v = f * ray.direction.dot(q);
+        let t = -(n.x * o.x + n.y * o.y + n.z * o.z + distance) / denom;
 
-        if v < 0.0 || u + v > 1.0 {
-            return None;
-        }
+        if t < t_min || t > t_max { return None; }
 
-        // At this stage we can compute t to find out where the intersection point is on the line.
-        let t = f * edge2.dot(q);
+        let point = ray.at(t);
 
-        if t > t_min && t < t_max {
-            let point = ray.at(t);
-            let normal = edge1.cross(edge2).unit_vector();
-            let mut rec = HitRecord {
-                t,
-                point,
-                normal,
-                front_face: false, // We'll set this properly next
-                material: &*self.material,
-            };
-            rec.set_face_normal(ray, normal);
-            Some(rec)
-        } else {
+        let c1 = edge1.cross(point - self.v1).dot(n);
+        let c2 = edge2.cross(point - self.v2).dot(n);
+        let c3 = edge3.cross(point - self.v3).dot(n);
+
+        if c1 > 0.0 && c2 > 0.0 && c3 > 0.0 {
+            let mut hit_record = HitRecord { point, normal: n, t: t, front_face: false, material: &*self.material };
+            hit_record.set_face_normal(ray, n);
+            return Some(hit_record);
+        } else{
             None
         }
+
     }
 }
