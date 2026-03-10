@@ -10,13 +10,15 @@ pub fn ray_color(ray: &Ray, world: &HittableList, lights: &[Light], max_depth: i
         return hit.material.shade(&hit, world, lights, view_dir, max_depth);
     } else {
         // Sky gradient
-        let unit_dir = ray.direction.unit_vector();
-        let t = 0.5 * (unit_dir.y + 1.0);   // map y from [-1,1] to [0,1]
-
-        let white = Vec3::new(1.0, 1.0, 1.0);
-        let blue  = Vec3::new(0.5, 0.7, 1.0);
-
-        return (1.0 - t) * white + t * blue;
+        // let unit_dir = ray.direction.unit_vector();
+        // let t = 0.5 * (unit_dir.y + 1.0);   // map y from [-1,1] to [0,1]
+        // 
+        // let white = Vec3::new(1.0, 1.0, 1.0);
+        // let blue  = Vec3::new(0.5, 0.7, 1.0);
+        // 
+        // return (1.0 - t) * white + t * blue;
+        
+        return Vec3::new(0.2, 0.2, 0.2);
     }
 }
 

@@ -20,6 +20,7 @@ pub struct WhittedStyleMaterial{
     Od: Vec3,
     Os: Vec3,
     Kgls: f64,
+    refl: f64,
 }
 
 pub trait Material {
@@ -33,8 +34,8 @@ impl PhongMaterial {
 }
 
 impl WhittedStyleMaterial {
-    pub fn new(Kd: f64, Ks: f64, Ka: f64, Od: Vec3, Os: Vec3, Kgls: f64) -> Self {
-        Self { Kd, Ks, Ka, Od, Os, Kgls }
+    pub fn new(Kd: f64, Ks: f64, Ka: f64, Od: Vec3, Os: Vec3, Kgls: f64, refl: f64) -> Self {
+        Self { Kd, Ks, Ka, Od, Os, Kgls, refl }
     }
 }
 
@@ -125,7 +126,7 @@ impl Material for WhittedStyleMaterial {
         //     let diffuse_ray = Ray::new(hit.point + hit.normal * 1e-5, target.unit_vector());
         //
         //     // Recurse to find the color of the object being "seen" by this surface
-        //     let indirect_color = ray_color(&diffuse_ray, world, lights, max_depth - 1);
+        //     let indirect_color = 0.5 * ray_color(&diffuse_ray, world, lights, max_depth - 1);
         //
         //     // Add to total color, attenuated by the material's diffuse coefficient (Kd)
         //     color = color + (self.Kd * indirect_color);
@@ -139,7 +140,7 @@ impl Material for WhittedStyleMaterial {
             let reflect_ray = Ray::new(hit.point + hit.normal * 1e-5, reflect_dir);
             let reflected_color = ray_color(&reflect_ray, world, lights, max_depth - 1);
 
-            color = color + (self.Ks * reflected_color);
+            color = color + (self.refl * reflected_color);
 
         }
 
