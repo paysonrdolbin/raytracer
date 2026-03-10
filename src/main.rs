@@ -10,6 +10,7 @@ mod common;
 mod utils;
 mod triangle;
 
+use image::codecs::pnm::ArbitraryTuplType::BlackAndWhiteAlpha;
 use vec3::Vec3;
 use ray::Ray;
 use sphere::Sphere;
@@ -30,46 +31,101 @@ fn main() {
     let samples = 50;
     let max_depth = 5;
 
-    // ground sphere material
+    // white sphere material
     let spherePhongWhite: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.0,
+        0.8,
         0.1,
-        0.1,
-        Vec3::new(0.75, 0.75, 0.75), // Od
+        0.3,
+        Vec3::new(1.0, 1.0, 1.0), // Od
         Vec3::new(1.0, 1.0, 1.0), // Os
-        10.0,
-        0.9
-    ));
-
-    // ground sphere
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.0, 0.3, -1.0), // position
-        0.25,
-        spherePhongWhite // material
-    )));
-
-    // glossy sphere material
-    let trianglePhongBlue: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.9,
-        1.0,
-        0.1,
-        Vec3::new(0.0, 0.0, 1.0),
-        Vec3::new(1.0, 1.0, 1.0),
         4.0,
         0.0
     ));
 
-    // blue triangle
+    // white sphere placement
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.5, 0.0, -0.15), // position
+        0.05,
+        spherePhongWhite // material
+    )));
+
+    // red sphere material
+    let spherePhongRed: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.8,
+        0.8,
+        0.1,
+        Vec3::new(1.0, 0.0, 0.0),
+        Vec3::new(0.5, 1.0, 0.5),
+        32.0,
+        0.0
+    ));
+
+    // red sphere placement
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.3, 0.0, -0.1),
+        0.08,
+        spherePhongRed
+    )));
+
+    // green sphere material
+    let spherePhongGreen: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.7,
+        0.5,
+        0.1,
+        Vec3::new(0.0, 1.0, 0.0),
+        Vec3::new(0.5, 1.0, 0.5),
+        64.0,
+        0.0
+    ));
+
+    // green sphere placement
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-0.6, 0.0, 0.0),
+        0.3,
+        spherePhongGreen
+    )));
+
+    // reflective sphere material
+    let spherePhongReflective: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.0,
+        0.1,
+        0.1,
+        Vec3::new(0.75, 0.75, 0.75),
+        Vec3::new(1.0, 1.0, 1.0),
+        10.0,
+        0.9
+    ));
+
+    // refelctive sphere placement
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.1, -0.55, 0.25),
+        0.3,
+        spherePhongReflective
+    )));
+
+    // blue triangle material
+    let trianglePhongBlue: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.9,
+        0.9,
+        0.1,
+        Vec3::new(0.0, 0.0, 1.0),
+        Vec3::new(1.0, 1.0, 1.0),
+        32.0,
+        0.0
+    ));
+
+    // blue triangle placement
     world.add(Box::new(Triangle::new(
-        Vec3::new(0.0, -0.7, -0.5),
-        Vec3::new(1.0, 0.4, -1.0),
-        Vec3::new(0.0, -0.7, -1.5),
+        Vec3::new(0.3, -0.3, -0.4),
+        Vec3::new(0.0, 0.3, -0.1),
+        Vec3::new(-0.3, -0.3, 0.2),
         trianglePhongBlue
     )));
 
+    // yellow triangle material
     let trianglePhongYellow: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
         0.9,
-        1.0,
+        0.5,
         0.1,
         Vec3::new(1.0, 1.0, 0.0),
         Vec3::new(1.0, 1.0, 1.0),
@@ -77,18 +133,19 @@ fn main() {
         0.0
     ));
 
+    // yellow triangle placement
     world.add(Box::new(Triangle::new(
-        Vec3::new(0.0, -0.7, -0.5),
-        Vec3::new(0.0, -0.7, -1.5),
-        Vec3::new(-1.0, 0.4, -1.0),
+        Vec3::new(-0.2, 0.1, 0.1),
+        Vec3::new(-0.2, -0.5, 0.2),
+        Vec3::new(-0.2, 0.1, -0.3),
         trianglePhongYellow
     )));
 
     let lights = vec![
         Light::Directional(DirectionalLight::new(
-            Vec3::new(0.0, 1.0, 0.0), // direction
+            Vec3::new(1.0, 0.0, 0.0), // direction
             Vec3::new(1.0, 1.0, 1.0))), // color
-        Light::Ambient(AmbientLight::new(Vec3::new(0.0, 0.0, 0.0))),
+        Light::Ambient(AmbientLight::new(Vec3::new(0.1, 0.1, 0.1))),
     ];
 
     // loop for camera movement
