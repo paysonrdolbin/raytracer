@@ -1,9 +1,22 @@
 use std::ptr::addr_eq;
+pub trait MaterialClone {
+    fn clone_box(&self) -> Box<dyn Material>;
+}
+
+impl<T> MaterialClone for T
+where
+    T: 'static + Material + Clone,
+{
+    fn clone_box(&self) -> Box<dyn Material> {
+        Box::new(self.clone())
+    }
+}
 use crate::vec3::Vec3;
 use crate::lights::Light;
 use crate::hittable::{HitRecord, HittableList, Hittable};
 use crate::Ray;
 use crate::utils::ray_color;
+#[derive(Clone)]
 pub struct PhongMaterial {
     Kd: f64,
     Ks: f64,
@@ -13,6 +26,7 @@ pub struct PhongMaterial {
     Kgls: f64,
 }
 
+#[derive(Clone)]
 pub struct WhittedStyleMaterial{
     Kd: f64,
     Ks: f64,
@@ -23,7 +37,7 @@ pub struct WhittedStyleMaterial{
     refl: f64,
 }
 
-pub trait Material {
+pub trait Material: MaterialClone {
     fn shade(&self, hit: &HitRecord, world: &HittableList, lights: &[Light], view_dir: Vec3, max_depth: i32) -> Vec3;
 }
 
@@ -145,5 +159,11 @@ impl Material for WhittedStyleMaterial {
         }
 
         color
+    }
+}
+
+impl Clone for Box<dyn Material> {
+    fn clone(&self) -> Box<dyn Material> {
+        self.clone_box()
     }
 }

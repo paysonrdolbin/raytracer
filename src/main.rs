@@ -24,128 +24,150 @@ use crate::common::random_double;
 use crate::triangle::Triangle;
 
 fn main() {
-    let aspect_ratio = 1.0;
+    let aspect_ratio = 16.0 / 9.0;
     let image_width = 500;
     let image_height = (image_width as f64 / aspect_ratio) as u32;
     let mut world = HittableList::new();
     let samples = 50;
     let max_depth = 5;
 
-    // white sphere material
-    let spherePhongWhite: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.8,
-        0.1,
-        0.3,
-        Vec3::new(1.0, 1.0, 1.0), // Od
-        Vec3::new(1.0, 1.0, 1.0), // Os
-        4.0,
+    // ---------- Materials ----------
+
+    // matte gray ground
+    let ground_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.9, 0.1, 0.0,
+        Vec3::new(0.7, 0.7, 0.7),
+        Vec3::new(0.0, 0.0, 0.0),
+        1.0,
         0.0
     ));
 
-    // white sphere placement
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.5, 0.0, -0.15), // position
-        0.05,
-        spherePhongWhite // material
-    )));
-
-    // red sphere material
-    let spherePhongRed: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.8,
-        0.8,
-        0.1,
-        Vec3::new(1.0, 0.0, 0.0),
-        Vec3::new(0.5, 1.0, 0.5),
-        32.0,
-        0.0
-    ));
-
-    // red sphere placement
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.3, 0.0, -0.1),
-        0.08,
-        spherePhongRed
-    )));
-
-    // green sphere material
-    let spherePhongGreen: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.7,
-        0.5,
-        0.1,
-        Vec3::new(0.0, 1.0, 0.0),
-        Vec3::new(0.5, 1.0, 0.5),
-        64.0,
-        0.0
-    ));
-
-    // green sphere placement
-    world.add(Box::new(Sphere::new(
-        Vec3::new(-0.6, 0.0, 0.0),
-        0.3,
-        spherePhongGreen
-    )));
-
-    // reflective sphere material
-    let spherePhongReflective: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.0,
-        0.1,
-        0.1,
-        Vec3::new(0.75, 0.75, 0.75),
+    // mirror material
+    let mirror_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.0, 0.1, 0.0,
+        Vec3::new(0.9, 0.9, 0.9),
         Vec3::new(1.0, 1.0, 1.0),
-        10.0,
+        64.0,
         0.9
     ));
 
-    // refelctive sphere placement
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.1, -0.55, 0.25),
-        0.3,
-        spherePhongReflective
-    )));
-
-    // blue triangle material
-    let trianglePhongBlue: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.9,
-        0.9,
-        0.1,
-        Vec3::new(0.0, 0.0, 1.0),
+    // blue glossy
+    let blue_gloss: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.8, 0.6, 0.2,
+        Vec3::new(0.1, 0.3, 1.0),
         Vec3::new(1.0, 1.0, 1.0),
         32.0,
-        0.0
+        0.1
     ));
 
-    // blue triangle placement
-    world.add(Box::new(Triangle::new(
-        Vec3::new(0.3, -0.3, -0.4),
-        Vec3::new(0.0, 0.3, -0.1),
-        Vec3::new(-0.3, -0.3, 0.2),
-        trianglePhongBlue
-    )));
-
-    // yellow triangle material
-    let trianglePhongYellow: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.9,
-        0.5,
-        0.1,
-        Vec3::new(1.0, 1.0, 0.0),
+    // red glossy
+    let red_gloss: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.8, 0.7, 0.2,
+        Vec3::new(1.0, 0.1, 0.1),
         Vec3::new(1.0, 1.0, 1.0),
-        4.0,
+        32.0,
+        0.2
+    ));
+
+    // green matte
+    let green_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.9, 0.4, 0.0,
+        Vec3::new(0.2, 0.8, 0.2),
+        Vec3::new(0.2, 0.2, 0.2),
+        8.0,
         0.0
     ));
 
-    // yellow triangle placement
     world.add(Box::new(Triangle::new(
-        Vec3::new(-0.2, 0.1, 0.1),
-        Vec3::new(-0.2, -0.5, 0.2),
-        Vec3::new(-0.2, 0.1, -0.3),
-        trianglePhongYellow
+        Vec3::new(-2.0, -0.6, -2.0),
+        Vec3::new( 2.0, -0.6, -2.0),
+        Vec3::new( 2.0, -0.6,  2.0),
+        ground_mat.clone()
     )));
+
+    world.add(Box::new(Triangle::new(
+        Vec3::new(-2.0, -0.6, -2.0),
+        Vec3::new( 2.0, -0.6,  2.0),
+        Vec3::new(-2.0, -0.6,  2.0),
+        ground_mat
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-0.4, -0.3, -3.0),
+        0.3,
+        mirror_mat
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.2, -0.35, -0.2),
+        0.25,
+        blue_gloss
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.7, -0.35, -0.9),
+        0.3,
+        red_gloss
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-0.8, -0.45, -0.5),
+        0.12,
+        green_mat.clone()
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-0.65, -0.45, -0.7),
+        0.1,
+        green_mat.clone()
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-0.9, -0.45, -0.75),
+        0.09,
+        green_mat
+    )));
+
+    let pyramid_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+        0.8, 0.8, 0.3,
+        Vec3::new(1.0, 0.8, 0.2),
+        Vec3::new(1.0, 1.0, 1.0),
+        32.0,
+        0.1
+    ));
+
+    let p0 = Vec3::new(0.0, -0.2, -0.7);
+    let p1 = Vec3::new(-0.2, -0.6, -0.9);
+    let p2 = Vec3::new(0.2, -0.6, -0.9);
+    let p3 = Vec3::new(0.0, -0.6, -0.5);
+
+    // sides
+    world.add(Box::new(Triangle::new(p0, p1, p2, pyramid_mat.clone())));
+    world.add(Box::new(Triangle::new(p0, p2, p3, pyramid_mat.clone())));
+    world.add(Box::new(Triangle::new(p0, p3, p1, pyramid_mat.clone())));
+
+    // base
+    world.add(Box::new(Triangle::new(p1, p2, p3, pyramid_mat)));
+
+
 
     let lights = vec![
+        // Key light (top-right)
         Light::Directional(DirectionalLight::new(
-            Vec3::new(1.0, 0.0, 0.0), // direction
-            Vec3::new(1.0, 1.0, 1.0))), // color
-        Light::Ambient(AmbientLight::new(Vec3::new(0.1, 0.1, 0.1))),
+            Vec3::new(1.0, 1.5, 1.0).unit_vector(),
+            Vec3::new(1.0, 1.0, 1.0),
+        )),
+
+        // Fill light (left side)
+        Light::Directional(DirectionalLight::new(
+            Vec3::new(-1.0, 0.5, 0.3).unit_vector(),
+            Vec3::new(0.4, 0.4, 0.5),
+        )),
+
+        // Ambient light
+        Light::Ambient(AmbientLight::new(
+            Vec3::new(0.08, 0.08, 0.08)
+        )),
     ];
 
     // loop for camera movement
@@ -221,16 +243,17 @@ fn main() {
     // }
 
     let camera = Camera::new(
-        Vec3::new(0.0, 0.0, 1.0),
-        Vec3::new(0.0, 0.0, 0.0),
-        Vec3::new(0.0, 1.0, 0.0),
-        90.0,
-        aspect_ratio
+        Vec3::new(0.0, -0.25, -0.8), // look direction
+        Vec3::new(0.0, 0.4, 1.6),   // camera position
+        Vec3::new(0.0, 1.0, 0.0),    // up vector
+        60.0,                        // field of view
+        aspect_ratio,
     );
 
-    println!("P3\n{} {}\n255", image_width, image_height); // PPM header
+    println!("P3\n{} {}\n255\n", image_width, image_height); // PPM header
 
     for j in (0..image_height).rev() {
+        eprint!("\rScanlines remaining: {} ", j);
         for i in 0..image_width {
             let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
             for s in 0..samples {
@@ -249,4 +272,5 @@ fn main() {
         }
     }
 
+    eprint!("\nDone.\n");
 }

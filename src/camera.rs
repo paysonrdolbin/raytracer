@@ -3,8 +3,8 @@ use crate::vec3::Vec3;
 
 pub struct Camera {
     pub origin: Vec3,
-    pub look_from: Vec3,
     pub look_at: Vec3,
+    pub look_from: Vec3,
     pub up: Vec3,
     pub fov: f64,
     pub aspectRatio: f64,
@@ -13,8 +13,8 @@ pub struct Camera {
     pub lower_left_corner: Vec3,
 }
 impl Camera {
-    pub fn new( look_from: Vec3,
-                look_at: Vec3,
+    pub fn new( look_at: Vec3,
+                look_from: Vec3,
                 up: Vec3,
                 fov: f64,
                 aspectRatio: f64
@@ -35,8 +35,8 @@ impl Camera {
 
         Camera {
             origin,
-            look_from,
             look_at,
+            look_from,
             up,
             fov,
             aspectRatio,
