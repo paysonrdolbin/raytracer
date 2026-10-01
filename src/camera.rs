@@ -6,7 +6,8 @@ pub struct Camera {
     pub look_at: Vec3,
     pub look_from: Vec3,
     pub up: Vec3,
-    pub fov: f64,
+    pub focal_length: f64,
+    pub sensor_height: f64,
     pub aspectRatio: f64,
     pub horizontal: Vec3,
     pub vertical: Vec3,
@@ -16,11 +17,11 @@ impl Camera {
     pub fn new( look_at: Vec3,
                 look_from: Vec3,
                 up: Vec3,
-                fov: f64,
+                focal_length: f64,
+                sensor_height: f64,
                 aspectRatio: f64
     ) -> Camera {
-        let theta = fov.to_radians();
-        let h = f64::tan(theta / 2.0);
+        let h = sensor_height / (2.0 * focal_length);
         let viewport_height = 1.0 * h;
         let viewport_width = aspectRatio * viewport_height;
 
@@ -38,7 +39,8 @@ impl Camera {
             look_at,
             look_from,
             up,
-            fov,
+            focal_length,
+            sensor_height,
             aspectRatio,
             horizontal,
             vertical,
