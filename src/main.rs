@@ -10,16 +10,17 @@ mod common;
 mod utils;
 mod triangle;
 
+use std::sync::Arc;
 use image::codecs::pnm::ArbitraryTuplType::BlackAndWhiteAlpha;
 use vec3::Vec3;
 use ray::Ray;
 use sphere::Sphere;
 use hittable::Hittable;
-use material::{Material, PhongMaterial, WhittedStyleMaterial};
+use material::{Material, PhongMaterial, WhittedStyleMaterial, Dialectric};
 use crate::camera::Camera;
 use lights::{Light, DirectionalLight, AmbientLight};
 use crate::hittable::HittableList;
-use crate::utils::ray_color;
+use crate::utils::{ray_color, srgb_encode};
 use crate::common::random_double;
 use crate::triangle::Triangle;
 
@@ -34,7 +35,7 @@ fn main() {
     // ---------- Materials ----------
 
     // matte gray ground
-    let ground_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+    let ground_mat: Arc<dyn Material> = Arc::new(WhittedStyleMaterial::new(
         0.9, 0.1, 0.0,
         Vec3::new(0.7, 0.7, 0.7),
         Vec3::new(0.0, 0.0, 0.0),
@@ -42,17 +43,12 @@ fn main() {
         0.0
     ));
 
-    // mirror material
-    let mirror_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
-        0.0, 0.1, 0.0,
-        Vec3::new(0.9, 0.9, 0.9),
-        Vec3::new(1.0, 1.0, 1.0),
-        64.0,
-        0.9
-    ));
+    // glass material
+    let glass_mat: Arc<dyn Material> = Arc::new(Dialectric::new(
+        1.5));
 
     // blue glossy
-    let blue_gloss: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+    let blue_gloss: Arc<dyn Material> = Arc::new(WhittedStyleMaterial::new(
         0.8, 0.6, 0.2,
         Vec3::new(0.1, 0.3, 1.0),
         Vec3::new(1.0, 1.0, 1.0),
@@ -61,7 +57,7 @@ fn main() {
     ));
 
     // red glossy
-    let red_gloss: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+    let red_gloss: Arc<dyn Material> = Arc::new(WhittedStyleMaterial::new(
         0.8, 0.7, 0.2,
         Vec3::new(1.0, 0.1, 0.1),
         Vec3::new(1.0, 1.0, 1.0),
@@ -70,7 +66,7 @@ fn main() {
     ));
 
     // green matte
-    let green_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+    let green_mat: Arc<dyn Material> = Arc::new(WhittedStyleMaterial::new(
         0.9, 0.4, 0.0,
         Vec3::new(0.2, 0.8, 0.2),
         Vec3::new(0.2, 0.2, 0.2),
@@ -95,19 +91,19 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Vec3::new(-0.4, -0.3, -3.0),
         0.3,
-        mirror_mat
+        glass_mat.clone()
     )));
 
     world.add(Box::new(Sphere::new(
         Vec3::new(0.2, -0.35, -0.2),
         0.25,
-        blue_gloss
+        glass_mat
     )));
 
     world.add(Box::new(Sphere::new(
         Vec3::new(0.7, -0.35, -0.9),
         0.3,
-        red_gloss
+        blue_gloss
     )));
 
     world.add(Box::new(Sphere::new(
@@ -128,7 +124,7 @@ fn main() {
         green_mat
     )));
 
-    let pyramid_mat: Box<dyn Material> = Box::new(WhittedStyleMaterial::new(
+    let pyramid_mat: Arc<dyn Material> = Arc::new(WhittedStyleMaterial::new(
         0.8, 0.8, 0.3,
         Vec3::new(1.0, 0.8, 0.2),
         Vec3::new(1.0, 1.0, 1.0),
@@ -246,7 +242,8 @@ fn main() {
         Vec3::new(0.0, -0.25, -0.8), // look direction
         Vec3::new(0.0, 0.4, 1.6),   // camera position
         Vec3::new(0.0, 1.0, 0.0),    // up vector
-        60.0,                        // field of view
+        35.0, // focal_length
+        24.0,
         aspect_ratio,
     );
 
@@ -265,9 +262,9 @@ fn main() {
                 pixel_color = pixel_color + ray_color(&r, &world, &lights, max_depth);
             }
             let mut final_color = pixel_color / samples as f64;
-            // final_color.x = final_color.x.sqrt();
-            // final_color.y = final_color.y.sqrt();
-            // final_color.z = final_color.z.sqrt();
+            final_color.x = srgb_encode(final_color.x);
+            final_color.y = srgb_encode(final_color.y);
+            final_color.z = srgb_encode(final_color.z);
             println!("{}", final_color.write_color());
         }
     }

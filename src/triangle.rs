@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::hittable::{Hittable, HitRecord};
 use crate::material::Material;
 use crate::ray::Ray;
@@ -7,11 +9,11 @@ pub struct Triangle {
     v1: Vec3,
     v2: Vec3,
     v3: Vec3,
-    material: Box<dyn Material>,
+    material: Arc<dyn Material>,
 }
 
 impl Triangle {
-    pub fn new(v1: Vec3, v2: Vec3, v3: Vec3, material: Box<dyn Material>) -> Self {
+    pub fn new(v1: Vec3, v2: Vec3, v3: Vec3, material: Arc<dyn Material>) -> Self {
         Self { v1, v2, v3, material }
     }
 }
