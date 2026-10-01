@@ -81,7 +81,6 @@ impl Vec3 {
             if p.length_squared() < 1.0 {
                 return p;
             }
-            return p;
         }
     }
 
@@ -91,6 +90,16 @@ impl Vec3 {
         (self.x.abs() < s) && (self.y.abs() < s) && (self.z.abs() < s)
     }
 
+    pub fn reflect(&self, n: Vec3) -> Vec3 {
+        *self - 2.0 * self.dot(n) * n
+    }
+
+    pub fn refract(&self, n: Vec3, etai_over_etat: f64) -> Vec3 {
+        let cos_theta = f64::min(-self.dot(n), 1.0);
+        let r_out_perp = etai_over_etat * (*self + cos_theta * n);
+        let r_out_parallel = -f64::sqrt(f64::abs(1.0 - r_out_perp.length_squared())) * n;
+        r_out_perp + r_out_parallel
+    }
 }
 
 impl Add for Vec3 {
@@ -146,3 +155,5 @@ impl Neg for Vec3 {
         Vec3::new(-self.x, -self.y, -self.z)
     }
 }
+
+pub type Point3 = Vec3;
